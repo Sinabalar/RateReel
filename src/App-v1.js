@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import {useEffect, useState} from "react";
 import icon from './icon.jpg';
 
 const tempMovieData = [
@@ -58,40 +58,50 @@ export default function App() {
 
     const [movies, setMovies] = useState([]);
     const [watched, setWatched] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         async function fetchMovies() {
+            setIsLoading(true);
             const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=${query}`);
-            const data = await res.json()
-            setMovies(data.Search)
+            const data = await res.json();
+            setMovies(data.Search);
+            console.log(data.Search);
+            setIsLoading(false);
         }
+
         fetchMovies()
     }, [])
 
     return (
         <div>
             <Nav>
-                <SearchBar />
-                <NumResults movies={movies} />
+                <SearchBar/>
+                <NumResults movies={movies}/>
             </Nav>
             <Main>
                 <Box>
-                    <MovieList movies={movies} />
+
+                    {
+                        isLoading
+                            ? <Loader/>
+                            : <MovieList movies={movies}/>
+                    }
                 </Box>
                 <Box>
-                    <Summary watched={watched} />
-                    <WatchedList watched={watched} />
+                    <Summary watched={watched}/>
+                    <WatchedList watched={watched}/>
                 </Box>
             </Main>
         </div>
     )
 }
 
-function Nav({ children }) {
+function Nav({children}) {
 
     return (
         <nav className="nav-bar">
-            <Logo />
+            <Logo/>
             {children}
         </nav>
     )
@@ -100,7 +110,7 @@ function Nav({ children }) {
 function Logo() {
     return (
         <div className="logo">
-            <img src={icon} alt="icon" />
+            <img src={icon} alt="icon"/>
             <h1>RateReel</h1>
         </div>
     )
@@ -121,7 +131,7 @@ function SearchBar() {
     )
 }
 
-function NumResults({ movies = [] }) {
+function NumResults({movies = []}) {
     return (
         <p className="num-results">
             Found <strong>{movies.length}</strong> results
@@ -130,7 +140,7 @@ function NumResults({ movies = [] }) {
 }
 
 
-function Main({ children }) {
+function Main({children}) {
     return (
         <main className="main">
             {children}
@@ -138,7 +148,7 @@ function Main({ children }) {
     );
 }
 
-function Box({ children }) {
+function Box({children}) {
     const [isOpen, setIsOpen] = useState(true);
     return (
         <div className="box">
@@ -154,12 +164,12 @@ function Box({ children }) {
 }
 
 
-function MovieList({ movies }) {
+function MovieList({movies}) {
     return (
         <ul className="list">
             {movies?.map((movie) => (
                 <li key={movie.imdbID}>
-                    <img src={movie.Poster} alt={`${movie.Title} poster`} />
+                    <img src={movie.Poster} alt={`${movie.Title} poster`}/>
                     <h3>{movie.Title}</h3>
                     <div>
                         <p>
@@ -173,14 +183,20 @@ function MovieList({ movies }) {
     )
 }
 
+function Loader() {
+    return (
+        <p className={'loader'}>Loading...</p>
+    );
 
-function WatchedList({ watched }) {
+}
+
+function WatchedList({watched}) {
 
     return (
         <ul className="list">
             {watched.map((movie) => (
                 <li key={movie.imdbID}>
-                    <img src={movie.Poster} alt={`${movie.Title} poster`} />
+                    <img src={movie.Poster} alt={`${movie.Title} poster`}/>
                     <h3>{movie.Title}</h3>
                     <div>
                         <p>
@@ -202,7 +218,7 @@ function WatchedList({ watched }) {
     )
 }
 
-function Summary({ watched }) {
+function Summary({watched}) {
     const avgImdbRating = average(watched.map((movie) => movie.imdbRating));
     const avgUserRating = average(watched.map((movie) => movie.userRating));
     const avgRuntime = average(watched.map((movie) => movie.runtime));
