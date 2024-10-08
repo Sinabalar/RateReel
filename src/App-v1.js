@@ -52,67 +52,64 @@ const average = (arr) =>
     arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
 const KEY = `3ca7bbfc`;
-const query = 'pulp';
 
 export default function App() {
 
     const [movies, setMovies] = useState([]);
     const [watched, setWatched] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState('')
+    const [error, setError] = useState('');
+    const [query, setQuery] = useState('');
+
 
     useEffect(() => {
-        async function fetchMovies() {
-            try {
-                setIsLoading(true);
-                setError('')
-                const res = await fetch(
-                    `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
-                );
+            async function fetchMovies() {
+                try {
+                    setIsLoading(true);
+                    setError('');
 
-                if (!res.ok)
-                    throw new Error();
+                    const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=${query}`);
 
-                const data = await res.json();
+                    if (!res.ok)
+                        throw new Error();
 
-                if (data.Response === 'False')
-                    throw new Error('Movie not found !');
 
-                setMovies(data.Search);
+                    const data = await res.json();
 
-            } catch (err) {
-                setError(err.message)
+                    if (data.Response === "False")
+                        throw new Error('Movie not found');
 
-            } finally {
-                setIsLoading(false);
+                    setMovies(data.Search);
+
+                } catch (err) {
+                    setError(err.message)
+                } finally {
+                    setIsLoading(false);
+                }
+
+
             }
 
-        }
-
-        fetchMovies()
-    }, [])
+            if (query.length < 3) {
+                setMovies([]);
+                setError('');
+                return;
+            }
+            fetchMovies()
+        }, [query]
+    )
 
     return (
         <div>
             <Nav>
-                <SearchBar/>
+                <SearchBar query={query} setQuery={setQuery}/>
                 <NumResults movies={movies}/>
             </Nav>
             <Main>
                 <Box>
-
-
                     {isLoading && <Loader/>}
                     {error && <ErrorMessage message={error}/>}
-                    {
-                        !isLoading
-                        &&
-                        !error
-                        &&
-                        <MovieList movies={movies}/>
-                    }
-
-
+                    {!isLoading && !error && <MovieList movies={movies}/>}
                 </Box>
                 <Box>
                     <Summary watched={watched}/>
@@ -142,9 +139,7 @@ function Logo() {
     )
 }
 
-function SearchBar() {
-
-    const [query, setQuery] = useState("");
+function SearchBar({query, setQuery}) {
 
     return (
         <input
@@ -219,7 +214,11 @@ function Loader() {
 function ErrorMessage({message}) {
     return (
         <p className={'error'}>
-            {message}
+            {
+                message === 'Failed to fetch'
+                    ? "Please check your internet connection !"
+                    : message
+            }
         </p>
     )
 }
