@@ -93,6 +93,10 @@ body {
   width: 7rem;
   height: 7rem;
 }
+.logo.imdb-icon{
+  width: 4rem;
+  height: 4rem;
+}
 
 .search {
   justify-self: center;
@@ -261,7 +265,7 @@ body {
 }
 
 .details img {
-  width: 33%;
+  width: 40%;
 }
 
 .details-overview {

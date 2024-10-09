@@ -1,5 +1,7 @@
 import {useEffect, useState} from "react";
 import icon from './icon.jpg';
+import imdbIcon from './imdb.png';
+import StarRating from './StarRating'
 
 const average = (arr) =>
     arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
@@ -87,8 +89,9 @@ export default function App() {
                 <Box>
                     {
                         selectedId
-                            ? <MovieDetails selectedId={selectedId}
-                                            onCloseMovie={handelCloseMovie}
+                            ? <MovieDetails
+                                selectedId={selectedId}
+                                onCloseMovie={handelCloseMovie}
                             />
                             : <>
                                 <Summary watched={watched}/>
@@ -221,14 +224,76 @@ function ErrorMessage({message}) {
 }
 
 function MovieDetails({selectedId, onCloseMovie}) {
+
+    const [movie, setMovie] = useState({});
+
+
+    useEffect(() => {
+        setIsLoading(true);
+        async function fetchMovieDetails() {
+            const res = await fetch(
+                `http://www.omdbapi.com/?apikey=${KEY}&i=${selectedId}`
+            );
+            const data = await res.json();
+            setMovie(data);
+            setIsLoading(false);
+        }
+
+        fetchMovieDetails()
+    }, [selectedId]);
+
+    const {
+        Title: title,
+        Year: year,
+        Poster: poster,
+        Runtime: runTime,
+        Plot: plot,
+        Released: released,
+        Actors: actors,
+        Director: director,
+        Genre: genre,
+        imdbRating
+    } = movie
+    const [isLoading, setIsLoading] = useState(false);
+
+
     return (
         <div className={'details'}>
-            <button
-                className={'btn-back'}
-                onClick={onCloseMovie}
-            >&larr;
-            </button>
-            {selectedId}
+            {isLoading && <Loader/>}
+            {!isLoading &&
+                <>
+                <header>
+                    <button
+                        className={'btn-back'}
+                        onClick={onCloseMovie}
+                    >&larr;
+                    </button>
+                    <img src={poster} alt={`poster of ${title} movie`}/>
+                    <div className={'details-overview'}>
+                        <h2>{title}</h2>
+                        <p>{released} &bull; {runTime}</p>
+                        <p>{genre}</p>
+                        <p>
+                            <span><img src={imdbIcon} className={'logo imdb-icon'} alt={'imdb logo'}/></span>
+                            {imdbRating}
+                        </p>
+                    </div>
+                </header>
+                <section>
+                <div className={'rating'}>
+                <StarRating size={24} maxRating={10}/>
+                </div>
+                <p>
+                <em>{plot}</em>
+                </p>
+                <p>Directed by {director}</p>
+                <p>Starring: {actors}</p>
+
+
+                </section>
+                </>
+            }
+
         </div>
     );
 
