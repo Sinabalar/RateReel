@@ -54,8 +54,17 @@ body {
   max-width: 42rem;
   background-color: var(--color-background-500);
   border-radius: 0.9rem;
-  overflow-y: scroll;
+  overflow-y: auto;
   position: relative;
+}
+.box::-webkit-scrollbar {
+  width: 1rem;
+  background-color: var(--color-background-100);
+}
+
+.box::-webkit-scrollbar-thumb {
+  background-color: #eacd67;
+  border-radius: 1rem;
 }
 
 .loader {
@@ -157,7 +166,7 @@ body {
 .list li {
   position: relative;
   display: grid;
-  grid-template-columns: 4rem 1fr;
+  grid-template-columns: 6rem 1fr;
   grid-template-rows: auto auto;
   column-gap: 2.4rem;
   font-size: 1.6rem;
@@ -169,7 +178,7 @@ body {
 
 .list.list-movies li {
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.1s;
 }
 
 .list.list-movies li:hover {
@@ -265,7 +274,7 @@ body {
 }
 
 .details img {
-  width: 40%;
+  width: 45%;
 }
 
 .details-overview {
@@ -302,18 +311,19 @@ body {
 
 .btn-add {
   background-color: var(--color-primary);
-  color: var(--color-text);
+  color: var(--color-primary-light);
   border: none;
   border-radius: 10rem;
   font-size: 1.4rem;
   padding: 1rem;
   font-weight: bold;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.1s;
 }
 
 .btn-add:hover {
   background-color: var(--color-primary-light);
+  color: var(--color-text);
 }
 
 .seconds {
