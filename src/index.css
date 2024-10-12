@@ -344,9 +344,8 @@ body {
   aspect-ratio: 1;
   border-radius: 50%;
   border: none;
-  /* background-color: var(--color-text); */
-  background-color: #fff;
-  color: var(--color-background-500);
+  background-color: var(--color-background-500);
+  color: var(--color-primary);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.8);
   font-family: sans-serif;
   font-size: 2.4rem;

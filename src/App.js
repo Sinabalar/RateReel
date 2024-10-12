@@ -33,6 +33,10 @@ export default function App() {
         handelCloseMovie();
     }
 
+    function handelRemoveWatchedMovie(id) {
+        setWatched((cur) => cur.filter(el => el.id !== id));
+    }
+
     useEffect(() => {
             async function fetchMovies() {
                 try {
@@ -41,11 +45,15 @@ export default function App() {
 
                     const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=${query}`);
 
+
+
+
                     if (!res.ok)
                         throw new Error();
 
 
                     const data = await res.json();
+                    console.log(data);
 
                     if (data.Response === "False")
                         throw new Error('Movie not found');
@@ -102,7 +110,10 @@ export default function App() {
                             />
                             : <>
                                 <Summary watched={watched}/>
-                                <WatchedList watched={watched}/>
+                                <WatchedList
+                                    watched={watched}
+                                    onRemoveMovie={handelRemoveWatchedMovie}
+                                />
                             </>
 
 
@@ -234,6 +245,7 @@ function MovieDetails({selectedId, onCloseMovie, onAddWatched, watched}) {
 
     const [movie, setMovie] = useState({});
     const [userRating, setUserRating] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
 
 
     useEffect(() => {
@@ -263,7 +275,7 @@ function MovieDetails({selectedId, onCloseMovie, onAddWatched, watched}) {
         Genre: genre,
         imdbRating
     } = movie
-    const [isLoading, setIsLoading] = useState(false);
+
 
     function handelAdd() {
 
@@ -271,11 +283,13 @@ function MovieDetails({selectedId, onCloseMovie, onAddWatched, watched}) {
             id: selectedId,
             title,
             poster,
-            runTime: Number(runTime.split(' ')[0]),
             year,
-            imdbRating: Number(imdbRating),
+            ...(isNaN(Number(imdbRating)) ? {} : {imdbRating}),
+            ...(isNaN(Number(runTime.split(' ')[0]))
+                ? {}
+                : {runTime: Number(runTime.split(' ')[0])}),
             userRating
-        }
+        };
 
         onAddWatched(newWatchedMovie)
 
@@ -342,18 +356,18 @@ function MovieDetails({selectedId, onCloseMovie, onAddWatched, watched}) {
 
 }
 
-function WatchedList({watched}) {
+function WatchedList({watched, onRemoveMovie}) {
 
     return (
         <ul className="list">
             {watched.map((el) => (
-                <WatchedMovie movieItem={el} key={el.id}/>
+                <WatchedMovie movieItem={el} key={el.id} onRemoveMovie={onRemoveMovie}/>
             ))}
         </ul>
     )
 }
 
-function WatchedMovie({movieItem}) {
+function WatchedMovie({movieItem, onRemoveMovie}) {
     return (
         <li key={movieItem.id}>
             <img src={movieItem.poster} alt={`${movieItem.title} poster`}/>
@@ -361,7 +375,7 @@ function WatchedMovie({movieItem}) {
             <div>
                 <p>
                     <span>⭐️</span>
-                    <span>{movieItem.imdbRating}</span>
+                    <span>{isNaN(movieItem.imdbRating) ? 0 : movieItem.imdbRating}</span>
                 </p>
                 <p>
                     <span>🌟</span>
@@ -371,15 +385,23 @@ function WatchedMovie({movieItem}) {
                     <span>⏳</span>
                     <span>{movieItem.runTime} min</span>
                 </p>
+                <button className={'btn-delete'} onClick={() => onRemoveMovie(movieItem.id)}>❌</button>
             </div>
         </li>
     )
 }
 
 function Summary({watched}) {
-    const avgImdbRating = Math.round(average(watched.map((el) => el.imdbRating)));
-    const avgUserRating = Math.round(average(watched.map((el) => el.userRating)));
-    const avgRuntime = Math.round(average(watched.map((el) => el.runTime)));
+    console.log(watched);
+
+    const moviesWithImdbRating = watched.filter(el => el.imdbRating !== undefined);
+
+    const avgImdbRating = (average(moviesWithImdbRating.map((el) => el?.imdbRating)));
+    const avgUserRating = (average(watched.map((el) => el.userRating)));
+
+    const moviesWithRunTime = watched.filter(el => el.runTime !== undefined);
+
+    const avgRuntime = (average(moviesWithRunTime.map((el) => el?.runTime)));
     return (
         <div className="summary">
             <h2>Movies you watched</h2>
@@ -390,15 +412,15 @@ function Summary({watched}) {
                 </p>
                 <p>
                     <span>⭐️</span>
-                    <span>{avgImdbRating}</span>
+                    <span>{avgImdbRating.toFixed(2)}</span>
                 </p>
                 <p>
                     <span>🌟</span>
-                    <span>{avgUserRating}</span>
+                    <span>{avgUserRating.toFixed(2)}</span>
                 </p>
                 <p>
                     <span>⏳</span>
-                    <span>{avgRuntime} min</span>
+                    <span>{avgRuntime.toFixed(2)} min</span>
                 </p>
             </div>
         </div>
