@@ -46,14 +46,11 @@ export default function App() {
                     const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=${query}`);
 
 
-
-
                     if (!res.ok)
                         throw new Error();
 
 
                     const data = await res.json();
-                    console.log(data);
 
                     if (data.Response === "False")
                         throw new Error('Movie not found');
@@ -297,6 +294,15 @@ function MovieDetails({selectedId, onCloseMovie, onAddWatched, watched}) {
 
     const alreadyWatched = watched.some((cur) => cur.id === movie.imdbID);
 
+    useEffect(() => {
+        if (!title) return;
+        document.title = `Movie | ${title}`;
+
+        return () => {
+            document.title = 'RateReel'
+        };
+    }, [title]);
+
 
     return (
         <div className={'details'}>
@@ -392,7 +398,6 @@ function WatchedMovie({movieItem, onRemoveMovie}) {
 }
 
 function Summary({watched}) {
-    console.log(watched);
 
     const moviesWithImdbRating = watched.filter(el => el.imdbRating !== undefined);
 
