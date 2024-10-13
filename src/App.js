@@ -11,7 +11,10 @@ const KEY = `3ca7bbfc`;
 export default function App() {
 
     const [movies, setMovies] = useState([]);
-    const [watched, setWatched] = useState([]);
+    const [watched, setWatched] = useState(function (){
+        const storedValue = localStorage.getItem('watched')
+        return JSON.parse(storedValue);
+    });
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [query, setQuery] = useState('');
@@ -36,6 +39,12 @@ export default function App() {
     function handelRemoveWatchedMovie(id) {
         setWatched((cur) => cur.filter(el => el.id !== id));
     }
+
+
+    useEffect(
+        () => {
+            localStorage.setItem('watched', JSON.stringify(watched))
+        }, [watched]);
 
     useEffect(() => {
             const controller = new AbortController();
@@ -309,10 +318,11 @@ function MovieDetails({selectedId, onCloseMovie, onAddWatched, watched}) {
                 console.log(1);
             }
         }
-        document.addEventListener('keydown',callBack)
-        return()=>document.removeEventListener('keydown',callBack)
 
-    },[onCloseMovie]);
+        document.addEventListener('keydown', callBack)
+        return () => document.removeEventListener('keydown', callBack)
+
+    }, [onCloseMovie]);
 
     const alreadyWatched = watched.some((cur) => cur.id === movie.imdbID);
 
