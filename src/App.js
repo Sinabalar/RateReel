@@ -38,12 +38,16 @@ export default function App() {
     }
 
     useEffect(() => {
+            const controller = new AbortController();
+
             async function fetchMovies() {
                 try {
                     setIsLoading(true);
                     setError('');
 
-                    const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=${query}`);
+                    const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=${query}`,
+                        {signal: controller.signal}
+                    );
 
 
                     if (!res.ok)
@@ -56,9 +60,13 @@ export default function App() {
                         throw new Error('Movie not found');
 
                     setMovies(data.Search);
+                    setError('');
+
 
                 } catch (err) {
-                    setError(err.message)
+                    if (err.name !== 'AbortError') {
+                        setError(err.message);
+                    }
                 } finally {
                     setIsLoading(false);
                 }
@@ -71,9 +79,10 @@ export default function App() {
                 setError('');
                 return;
             }
-            fetchMovies()
+            fetchMovies();
+            return () => controller.abort();
         }, [query]
-    )
+    );
 
     return (
         <div>
@@ -291,6 +300,19 @@ function MovieDetails({selectedId, onCloseMovie, onAddWatched, watched}) {
         onAddWatched(newWatchedMovie)
 
     }
+
+    useEffect(() => {
+        function callBack(e) {
+
+            if (e.key === 'Escape') {
+                onCloseMovie();
+                console.log(1);
+            }
+        }
+        document.addEventListener('keydown',callBack)
+        return()=>document.removeEventListener('keydown',callBack)
+
+    },[onCloseMovie]);
 
     const alreadyWatched = watched.some((cur) => cur.id === movie.imdbID);
 
