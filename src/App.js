@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import icon from './icon.jpg';
 import imdbIcon from './imdb.png';
 import StarRating from './StarRating'
@@ -11,7 +11,7 @@ const KEY = `3ca7bbfc`;
 export default function App() {
 
     const [movies, setMovies] = useState([]);
-    const [watched, setWatched] = useState(function (){
+    const [watched, setWatched] = useState(function () {
         const storedValue = localStorage.getItem('watched')
         return JSON.parse(storedValue);
     });
@@ -159,6 +159,21 @@ function Logo() {
 }
 
 function SearchBar({query, setQuery}) {
+    const searchEl = useRef(null);
+
+    useEffect(function () {
+        function callBack(e) {
+            if(document.activeElement ===searchEl.current)return
+            if (e.key === 'Enter') {
+                searchEl.current.focus();
+                setQuery('');
+            }
+        }
+
+        document.addEventListener('keydown', callBack);
+        return document.addEventListener('keydown', callBack);
+
+    }, [setQuery])
 
     return (
         <input
@@ -167,6 +182,7 @@ function SearchBar({query, setQuery}) {
             placeholder="Search movies..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            ref={searchEl}
         />
     )
 }
@@ -315,7 +331,6 @@ function MovieDetails({selectedId, onCloseMovie, onAddWatched, watched}) {
 
             if (e.key === 'Escape') {
                 onCloseMovie();
-                console.log(1);
             }
         }
 
