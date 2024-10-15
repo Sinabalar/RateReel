@@ -3,6 +3,7 @@ import icon from './icon.jpg';
 import imdbIcon from './imdb.png';
 import StarRating from './StarRating'
 import {useMovies} from "./useMovies";
+import {useLocalStorageState} from "./useLocalStorageState"
 
 const average = (arr) =>
     arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
@@ -11,10 +12,7 @@ const KEY = `3ca7bbfc`;
 
 export default function App() {
 
-    const [watched, setWatched] = useState(function () {
-        const storedValue = localStorage.getItem('watched')
-        return JSON.parse(storedValue);
-    });
+    const [watched, setWatched] = useLocalStorageState([],'watched')
     const [query, setQuery] = useState('');
     const [selectedId, setSelectedId] = useState(null);
 
@@ -39,12 +37,6 @@ export default function App() {
     function handelRemoveWatchedMovie(id) {
         setWatched((cur) => cur.filter(el => el.id !== id));
     }
-
-
-    useEffect(
-        () => {
-            localStorage.setItem('watched', JSON.stringify(watched))
-        }, [watched]);
 
 
     return (
@@ -233,13 +225,11 @@ function MovieDetails({selectedId, onCloseMovie, onAddWatched, watched}) {
     const [isLoading, setIsLoading] = useState(false);
 
     const countRef = useRef(0);
-    let test = 0;
 
     useEffect(() => {
         if (userRating) countRef.current++;
-        if (userRating) test++;
 
-    }, [userRating, test])
+    }, [userRating])
 
 
     useEffect(() => {
@@ -284,7 +274,6 @@ function MovieDetails({selectedId, onCloseMovie, onAddWatched, watched}) {
                 : {runTime: Number(runTime.split(' ')[0])}),
             userRating,
             countRatingDecisions: countRef.current,
-            test,
         };
 
         onAddWatched(newWatchedMovie)

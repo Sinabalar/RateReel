@@ -11,6 +11,7 @@ export function useMovies(query) {
     const [error, setError] = useState('');
     useEffect(() => {
             const controller = new AbortController();
+
             async function fetchMovies() {
 
                 try {
@@ -38,7 +39,7 @@ export function useMovies(query) {
                     if (err.name !== 'AbortError') {
                         setError(err.message);
                     }
-                }finally {
+                } finally {
                     setIsLoading(false)
                 }
 
