@@ -3,6 +3,7 @@ import icon from './icon.jpg';
 import imdbIcon from './imdb.png';
 import StarRating from './StarRating'
 import {useMovies} from "./useMovies";
+import {useKey} from "./useKey";
 import {useLocalStorageState} from "./useLocalStorageState"
 
 const average = (arr) =>
@@ -12,7 +13,7 @@ const KEY = `3ca7bbfc`;
 
 export default function App() {
 
-    const [watched, setWatched] = useLocalStorageState([],'watched')
+    const [watched, setWatched] = useLocalStorageState([], 'watched')
     const [query, setQuery] = useState('');
     const [selectedId, setSelectedId] = useState(null);
 
@@ -107,19 +108,11 @@ function Logo() {
 function SearchBar({query, setQuery}) {
     const searchEl = useRef(null);
 
-    useEffect(function () {
-        function callBack(e) {
-            if (document.activeElement === searchEl.current) return
-            if (e.key === 'Enter') {
-                searchEl.current.focus();
-                setQuery('');
-            }
-        }
-
-        document.addEventListener('keydown', callBack);
-        return document.addEventListener('keydown', callBack);
-
-    }, [setQuery])
+    useKey('enter', function () {
+        if (document.activeElement === searchEl.current) return
+        searchEl.current.focus();
+        setQuery('');
+    });
 
     return (
         <input
@@ -280,18 +273,7 @@ function MovieDetails({selectedId, onCloseMovie, onAddWatched, watched}) {
 
     }
 
-    useEffect(() => {
-        function callBack(e) {
-
-            if (e.key === 'Escape') {
-                onCloseMovie();
-            }
-        }
-
-        document.addEventListener('keydown', callBack)
-        return () => document.removeEventListener('keydown', callBack)
-
-    }, [onCloseMovie]);
+    useKey('escape',onCloseMovie );
 
     const alreadyWatched = watched.some((cur) => cur.id === movie.imdbID);
 
